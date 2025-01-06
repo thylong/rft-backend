@@ -13,6 +13,8 @@ import (
 type Querier interface {
 	// Delete an event by ID
 	DeleteEvent(ctx context.Context, eventID pgtype.UUID) error
+	// Delete an okr by ID
+	DeleteOkr(ctx context.Context, id pgtype.UUID) error
 	// Get a single event by ID
 	GetEventByID(ctx context.Context, eventID pgtype.UUID) (Event, error)
 	// queries.sql
@@ -20,8 +22,17 @@ type Querier interface {
 	GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, error)
 	// Get total count for pagination
 	GetEventsCount(ctx context.Context, dollar_1 pgtype.Text) (int64, error)
+	// Get a single okr by ID
+	GetOkrByID(ctx context.Context, id pgtype.UUID) (GetOkrByIDRow, error)
+	// okrs.sql
+	// Get okrs with pagination and optional search
+	GetOkrs(ctx context.Context, arg GetOkrsParams) ([]GetOkrsRow, error)
+	// Get total count for pagination
+	GetOkrsCount(ctx context.Context, dollar_1 pgtype.Text) (int64, error)
 	// Insert a new event
 	InsertEvent(ctx context.Context, arg InsertEventParams) (Event, error)
+	// Insert a new okr
+	InsertOkr(ctx context.Context, arg InsertOkrParams) error
 }
 
 var _ Querier = (*Queries)(nil)

@@ -19,3 +19,22 @@ type Event struct {
 	Tags         []string         `json:"tags"`
 	StartAt      pgtype.Timestamp `json:"start_at"`
 }
+
+type Okr struct {
+	ID          pgtype.UUID `json:"id"`
+	Name        string      `json:"name"`
+	Number      int32       `json:"number"`
+	Year        int32       `json:"year"`
+	Description string      `json:"description"`
+}
+
+type OkrKr struct {
+	ID          pgtype.UUID `json:"id"`
+	OkrID       pgtype.UUID `json:"okr_id"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Sponsor     string      `json:"sponsor"`
+	Kpis        string      `json:"kpis"`
+	Scope       string      `json:"scope"`
+	Initiatives string      `json:"initiatives"`
+}

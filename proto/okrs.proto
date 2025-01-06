@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package okrs;
+
+import "google/type/datetime.proto";
+
+// Kr represents a kr that occured in the company
+message Kr {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string sponsor = 4;
+  string kpis = 5;
+  string scope = 6;
+  string initiatives = 7;
+}
+
+// Okr represents an okr that occured in the company
+message Okr {
+  string id = 2;
+  string name = 3;
+  int32 number = 4;
+  int32 year = 5;
+  string description = 6;
+  repeated Kr embedded_child = 7;
+}
+
+message GetOkrsRequest {
+  // Pagination parameters (optional)
+  int32 page = 1;        // The page number
+  int32 page_size = 2;   // Number of okrs per page
+  
+  // Filtering parameters (optional)
+  string search = 3;     // Search query for filtering okrs
+}
+
+// Response message for GetOkrs
+message GetOkrsResponse {
+  repeated Okr okrs = 1;
+  
+  // Pagination metadata
+  int32 total_count = 2;  // Total number of okrs
+  int32 page = 3;         // Current page
+  int32 page_size = 4;    // Number of okrs per page
+}
+
+message GetOkrRequest {
+  string id = 1;
+}
+
+message GetOkrResponse {
+  Okr okr = 1;
+}
+
+message PutOkrRequest {
+  string id = 2;
+  string name = 3;
+  string description = 4;
+  string type = 5;
+  string department = 6;
+  repeated string regions = 7;
+  repeated string tags = 8;
+  google.type.DateTime start_at = 9;
+}
+
+message PutOkrResponse {
+  Okr okr = 1;
+}
+
+message DeleteOkrRequest {
+  string id = 1;
+}
+
+message DeleteOkrResponse {}
+
+service OkrService {
+  rpc GetOkrs(GetOkrsRequest) returns (GetOkrsResponse) {}
+  rpc GetOkr(GetOkrRequest) returns (GetOkrResponse) {}
+  rpc PutOkr(PutOkrRequest) returns (PutOkrResponse) {}
+  rpc DeleteOkr(DeleteOkrRequest) returns (DeleteOkrResponse) {}
+}

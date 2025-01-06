@@ -1,4 +1,4 @@
--- queries.sql
+-- events.sql
 
 -- Get events with pagination and optional search
 -- name: GetEvents :many
