@@ -22,6 +22,7 @@ const (
 	OkrService_GetOkrs_FullMethodName   = "/okrs.OkrService/GetOkrs"
 	OkrService_GetOkr_FullMethodName    = "/okrs.OkrService/GetOkr"
 	OkrService_PutOkr_FullMethodName    = "/okrs.OkrService/PutOkr"
+	OkrService_PutKr_FullMethodName     = "/okrs.OkrService/PutKr"
 	OkrService_DeleteOkr_FullMethodName = "/okrs.OkrService/DeleteOkr"
 )
 
@@ -32,6 +33,7 @@ type OkrServiceClient interface {
 	GetOkrs(ctx context.Context, in *GetOkrsRequest, opts ...grpc.CallOption) (*GetOkrsResponse, error)
 	GetOkr(ctx context.Context, in *GetOkrRequest, opts ...grpc.CallOption) (*GetOkrResponse, error)
 	PutOkr(ctx context.Context, in *PutOkrRequest, opts ...grpc.CallOption) (*PutOkrResponse, error)
+	PutKr(ctx context.Context, in *PutKrRequest, opts ...grpc.CallOption) (*PutKrResponse, error)
 	DeleteOkr(ctx context.Context, in *DeleteOkrRequest, opts ...grpc.CallOption) (*DeleteOkrResponse, error)
 }
 
@@ -73,6 +75,16 @@ func (c *okrServiceClient) PutOkr(ctx context.Context, in *PutOkrRequest, opts .
 	return out, nil
 }
 
+func (c *okrServiceClient) PutKr(ctx context.Context, in *PutKrRequest, opts ...grpc.CallOption) (*PutKrResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PutKrResponse)
+	err := c.cc.Invoke(ctx, OkrService_PutKr_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *okrServiceClient) DeleteOkr(ctx context.Context, in *DeleteOkrRequest, opts ...grpc.CallOption) (*DeleteOkrResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteOkrResponse)
@@ -90,6 +102,7 @@ type OkrServiceServer interface {
 	GetOkrs(context.Context, *GetOkrsRequest) (*GetOkrsResponse, error)
 	GetOkr(context.Context, *GetOkrRequest) (*GetOkrResponse, error)
 	PutOkr(context.Context, *PutOkrRequest) (*PutOkrResponse, error)
+	PutKr(context.Context, *PutKrRequest) (*PutKrResponse, error)
 	DeleteOkr(context.Context, *DeleteOkrRequest) (*DeleteOkrResponse, error)
 	mustEmbedUnimplementedOkrServiceServer()
 }
@@ -109,6 +122,9 @@ func (UnimplementedOkrServiceServer) GetOkr(context.Context, *GetOkrRequest) (*G
 }
 func (UnimplementedOkrServiceServer) PutOkr(context.Context, *PutOkrRequest) (*PutOkrResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PutOkr not implemented")
+}
+func (UnimplementedOkrServiceServer) PutKr(context.Context, *PutKrRequest) (*PutKrResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutKr not implemented")
 }
 func (UnimplementedOkrServiceServer) DeleteOkr(context.Context, *DeleteOkrRequest) (*DeleteOkrResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOkr not implemented")
@@ -188,6 +204,24 @@ func _OkrService_PutOkr_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OkrService_PutKr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutKrRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OkrServiceServer).PutKr(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OkrService_PutKr_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OkrServiceServer).PutKr(ctx, req.(*PutKrRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _OkrService_DeleteOkr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteOkrRequest)
 	if err := dec(in); err != nil {
@@ -224,6 +258,10 @@ var OkrService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PutOkr",
 			Handler:    _OkrService_PutOkr_Handler,
+		},
+		{
+			MethodName: "PutKr",
+			Handler:    _OkrService_PutKr_Handler,
 		},
 		{
 			MethodName: "DeleteOkr",

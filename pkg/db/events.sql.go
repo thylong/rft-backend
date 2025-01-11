@@ -56,7 +56,7 @@ type GetEventsParams struct {
 	Offset  int32       `json:"offset"`
 }
 
-// queries.sql
+// events.sql
 // Get events with pagination and optional search
 func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]Event, error) {
 	rows, err := q.db.Query(ctx, getEvents, arg.Column1, arg.Limit, arg.Offset)

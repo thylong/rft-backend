@@ -100,6 +100,7 @@ var runCmd = &cobra.Command{
 
 		grpc_health_v1.RegisterHealthServer(app, healthServer)
 		eventpb.RegisterEventServiceServer(app, server.NewEventServiceServer(queries))
+		eventpb.RegisterOkrServiceServer(app, server.NewOkrServiceServer(queries))
 		// Set the health status of the server
 		healthServer.SetServingStatus("EventService", grpc_health_v1.HealthCheckResponse_SERVING)
 		reflection.Register(app)

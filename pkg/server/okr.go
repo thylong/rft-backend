@@ -48,12 +48,32 @@ func (s *OkrServiceServer) GetOkrs(ctx context.Context, req *pb.GetOkrsRequest) 
 
 	var pbOkrs []*pb.Okr
 	for _, e := range okrs {
+		// Convert KeyResults to []*pb.Kr
+		var pbKeyResults []*pb.Kr
+		if keyResults, ok := e.KeyResults.([]interface{}); ok {
+			for _, kr := range keyResults {
+				if krMap, ok := kr.(map[string]interface{}); ok {
+					pbKeyResults = append(pbKeyResults, &pb.Kr{
+						Id:          krMap["id"].(string),
+						Name:        krMap["name"].(string),
+						Number:      int32(krMap["number"].(float64)),
+						Description: krMap["description"].(string),
+						Sponsor:     krMap["sponsor"].(string),
+						Kpis:        krMap["kpis"].(string),
+						Scope:       krMap["scope"].(string),
+						Initiatives: krMap["initiatives"].(string),
+					})
+				}
+			}
+		}
+
+		// Append OKR to the response list
 		pbOkrs = append(pbOkrs, &pb.Okr{
 			Id:            e.OkrID.String(),
 			Name:          e.OkrName,
 			Number:        e.OkrNumber,
 			Description:   e.OkrDescription,
-			EmbeddedChild: e.KeyResults.([]*pb.Kr),
+			EmbeddedChild: pbKeyResults,
 		})
 	}
 
@@ -101,29 +121,22 @@ func (s *OkrServiceServer) GetOkr(ctx context.Context, req *pb.GetOkrRequest) (*
 // PutOkr handles inserting a new okr
 func (s *OkrServiceServer) PutOkr(ctx context.Context, req *pb.PutOkrRequest) (*pb.PutOkrResponse, error) {
 	okr, err := s.queries.InsertOkr(ctx, db.InsertOkrParams{
-		Id:            req.Id.String(),
-		Name:          req.OkrName,
-		Number:        req.OkrNumber,
-		Description:   req.OkrDescription,
-		EmbeddedChild: req.KeyResults.([]*pb.Kr),
+		Name:        req.Name,
+		Number:      req.Number,
+		Year:        req.Year,
+		Description: req.Description,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert okr: %w", err)
 	}
 
-	startAtProto, _ := convertToProtoDateTime(okr.StartAt)
-
 	return &pb.PutOkrResponse{
 		Okr: &pb.Okr{
-			OkrId:       okr.OkrID.String(),
-			OkrPrivacy:  pb.OkrPrivacy(okr.OkrPrivacy),
-			Name:        okr.Name,
-			Description: okr.Description,
-			Type:        okr.Type,
-			Department:  okr.Department,
-			Regions:     okr.Regions,
-			Tags:        okr.Tags,
-			StartAt:     startAtProto,
+			Id:          okr.OkrID.String(),
+			Name:        okr.OkrName,
+			Number:      okr.OkrNumber,
+			Year:        okr.OkrYear,
+			Description: okr.OkrDescription,
 		},
 	}, nil
 }
@@ -147,4 +160,42 @@ func (s *OkrServiceServer) DeleteOkr(ctx context.Context, req *pb.DeleteOkrReque
 		return nil, fmt.Errorf("failed to delete okr: %w", err)
 	}
 	return &pb.DeleteOkrResponse{}, nil
+}
+
+// PutKr handles inserting a new kr
+func (s *OkrServiceServer) PutKr(ctx context.Context, req *pb.PutKrRequest) (*pb.PutKrResponse, error) {
+	// TODO: Make sure the okr exists
+
+	var pgUUID pgtype.UUID
+	err := pgUUID.Scan(req.OkrId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse okr_id UUID: %w", err)
+	}
+	kr, err := s.queries.InsertKeyResult(ctx, db.InsertKeyResultParams{
+		OkrID:       pgUUID,
+		Name:        req.Name,
+		Number:      req.Number,
+		Description: req.Description,
+		Sponsor:     req.Sponsor,
+		Kpis:        req.Kpis,
+		Scope:       req.Scope,
+		Initiatives: req.Initiatives,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert kr: %w", err)
+	}
+
+	return &pb.PutKrResponse{
+		Kr: &pb.Kr{
+			Id:          kr.ID.String(),
+			OkrId:       kr.OkrID.String(),
+			Name:        kr.Name,
+			Number:      kr.Number,
+			Description: kr.Description,
+			Sponsor:     kr.Sponsor,
+			Kpis:        kr.Kpis,
+			Scope:       kr.Scope,
+			Initiatives: kr.Initiatives,
+		},
+	}, nil
 }

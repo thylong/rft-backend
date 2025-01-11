@@ -32,6 +32,7 @@ type OkrKr struct {
 	ID          pgtype.UUID `json:"id"`
 	OkrID       pgtype.UUID `json:"okr_id"`
 	Name        string      `json:"name"`
+	Number      int32       `json:"number"`
 	Description string      `json:"description"`
 	Sponsor     string      `json:"sponsor"`
 	Kpis        string      `json:"kpis"`

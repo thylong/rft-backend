@@ -38,8 +38,11 @@ SELECT
             'id', k.id,
             'name', k.name,
             'number', k.number,
-            'year', k.year,
-            'description', k.description
+            'description', k.description,
+            'sponsor', k.sponsor,
+            'kpis', k.kpis,
+            'scope', k.scope,
+            'initiatives', k.initiatives
         )
     ) AS key_results
 FROM okrs o
@@ -80,18 +83,24 @@ SELECT
     o.number AS okr_number, 
     o.year AS okr_year, 
     o.description AS okr_description,
-    ARRAY_AGG(
-        JSON_BUILD_OBJECT(
-            'id', k.id,
-            'name', k.name,
-            'number', k.number,
-            'year', k.year,
-            'description', k.description
-        )
+    COALESCE(
+        ARRAY_AGG(
+            JSON_BUILD_OBJECT(
+                'id', k.id,
+                'name', k.name,
+                'number', k.number,
+                'description', k.description,
+                'sponsor', k.sponsor,
+                'kpis', k.kpis,
+                'scope', k.scope,
+                'initiatives', k.initiatives
+            )
+        ) FILTER (WHERE k.id IS NOT NULL), 
+        '{}'::json[]
     ) AS key_results
 FROM okrs o
 LEFT JOIN okr_krs k ON o.id = k.okr_id
-GROUP BY o.id
+GROUP BY o.id, o.name, o.number, o.year, o.description
 LIMIT $1 OFFSET $2
 `
 
@@ -151,52 +160,115 @@ func (q *Queries) GetOkrsCount(ctx context.Context, dollar_1 pgtype.Text) (int64
 	return count, err
 }
 
-const insertOkr = `-- name: InsertOkr :exec
-WITH new_okr AS (
-    INSERT INTO okrs (id, name, number, year, description)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING id
-),
-expanded_krs AS (
-    SELECT
-        UNNEST($6::uuid[]) AS kr_id,
-        UNNEST($7::text[]) AS kr_name,
-        UNNEST($8::int[]) AS kr_number,
-        UNNEST($9::int[]) AS kr_year,
-        UNNEST($10::text[]) AS kr_description,
-        (SELECT id FROM new_okr) AS okr_id
+const insertKeyResult = `-- name: InsertKeyResult :one
+INSERT INTO okr_krs (
+    okr_id, 
+    name, 
+    number, 
+    description, 
+    sponsor, 
+    kpis, 
+    scope, 
+    initiatives
 )
-INSERT INTO okr_krs (id, okr_id, name, number, year, description)
-SELECT kr_id, okr_id, kr_name, kr_number, kr_year, kr_description
-FROM expanded_krs
+VALUES 
+    ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING 
+    id, 
+    okr_id, 
+    name, 
+    number, 
+    description, 
+    sponsor, 
+    kpis, 
+    scope, 
+    initiatives
+`
+
+type InsertKeyResultParams struct {
+	OkrID       pgtype.UUID `json:"okr_id"`
+	Name        string      `json:"name"`
+	Number      int32       `json:"number"`
+	Description string      `json:"description"`
+	Sponsor     string      `json:"sponsor"`
+	Kpis        string      `json:"kpis"`
+	Scope       string      `json:"scope"`
+	Initiatives string      `json:"initiatives"`
+}
+
+// Insert a new key result
+func (q *Queries) InsertKeyResult(ctx context.Context, arg InsertKeyResultParams) (OkrKr, error) {
+	row := q.db.QueryRow(ctx, insertKeyResult,
+		arg.OkrID,
+		arg.Name,
+		arg.Number,
+		arg.Description,
+		arg.Sponsor,
+		arg.Kpis,
+		arg.Scope,
+		arg.Initiatives,
+	)
+	var i OkrKr
+	err := row.Scan(
+		&i.ID,
+		&i.OkrID,
+		&i.Name,
+		&i.Number,
+		&i.Description,
+		&i.Sponsor,
+		&i.Kpis,
+		&i.Scope,
+		&i.Initiatives,
+	)
+	return i, err
+}
+
+const insertOkr = `-- name: InsertOkr :one
+WITH new_okr AS (
+    INSERT INTO okrs (name, number, year, description)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id, name, number, year, description
+)
+SELECT 
+    o.id AS okr_id,
+    o.name AS okr_name,
+    o.number AS okr_number,
+    o.year AS okr_year,
+    o.description AS okr_description
+FROM 
+    new_okr o
 `
 
 type InsertOkrParams struct {
-	ID          pgtype.UUID   `json:"id"`
-	Name        string        `json:"name"`
-	Number      int32         `json:"number"`
-	Year        int32         `json:"year"`
-	Description string        `json:"description"`
-	Column6     []pgtype.UUID `json:"column_6"`
-	Column7     []string      `json:"column_7"`
-	Column8     []int32       `json:"column_8"`
-	Column9     []int32       `json:"column_9"`
-	Column10    []string      `json:"column_10"`
+	Name        string `json:"name"`
+	Number      int32  `json:"number"`
+	Year        int32  `json:"year"`
+	Description string `json:"description"`
+}
+
+type InsertOkrRow struct {
+	OkrID          pgtype.UUID `json:"okr_id"`
+	OkrName        string      `json:"okr_name"`
+	OkrNumber      int32       `json:"okr_number"`
+	OkrYear        int32       `json:"okr_year"`
+	OkrDescription string      `json:"okr_description"`
 }
 
 // Insert a new okr
-func (q *Queries) InsertOkr(ctx context.Context, arg InsertOkrParams) error {
-	_, err := q.db.Exec(ctx, insertOkr,
-		arg.ID,
+func (q *Queries) InsertOkr(ctx context.Context, arg InsertOkrParams) (InsertOkrRow, error) {
+	row := q.db.QueryRow(ctx, insertOkr,
 		arg.Name,
 		arg.Number,
 		arg.Year,
 		arg.Description,
-		arg.Column6,
-		arg.Column7,
-		arg.Column8,
-		arg.Column9,
-		arg.Column10,
 	)
-	return err
+	var i InsertOkrRow
+	err := row.Scan(
+		&i.OkrID,
+		&i.OkrName,
+		&i.OkrNumber,
+		&i.OkrYear,
+		&i.OkrDescription,
+	)
+	return i, err
 }
