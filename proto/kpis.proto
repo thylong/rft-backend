@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package kpis;
+
+// Kpi represents a KPI
+message Kpi {
+  string id = 1;
+  string name = 2;
+  float value = 3;
+  float target = 4;
+  string day = 5; // ISO 8601 format (e.g., YYYY-MM-DD)
+}
+
+message GetKpisRequest {
+  // Pagination parameters (optional)
+  int32 page = 1;        // The page number
+  int32 page_size = 2;   // Number of kpis per page
+  
+  // Filtering parameters (optional)
+  string search = 3;     // Search query for filtering kpis
+}
+
+// Response message for GetKpis
+message GetKpisResponse {
+  repeated Kpi kpis = 1;
+  
+  // Pagination metadata
+  int32 total_count = 2;  // Total number of kpis
+  int32 page = 3;         // Current page
+  int32 page_size = 4;    // Number of kpis per page
+}
+
+message GetKpiRequest {
+  string id = 1;
+}
+
+message GetKpiResponse {
+  Kpi kpi = 1;
+}
+
+message PutKpiRequest {
+  string name = 1;
+  float value = 2;
+  float target = 3;
+  string day = 4; // ISO 8601 format (e.g., YYYY-MM-DD)
+}
+
+message PutKpiResponse {
+  Kpi kpi = 1;
+}
+
+message DeleteKpiRequest {
+  string id = 1;
+}
+
+message DeleteKpiResponse {}
+
+service KpiService {
+  rpc GetKpis(GetKpisRequest) returns (GetKpisResponse) {}
+  rpc GetKpi(GetKpiRequest) returns (GetKpiResponse) {}
+  rpc PutKpi(PutKpiRequest) returns (PutKpiResponse) {}
+  rpc DeleteKpi(DeleteKpiRequest) returns (DeleteKpiResponse) {}
+}

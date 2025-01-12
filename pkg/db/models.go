@@ -20,6 +20,16 @@ type Event struct {
 	StartAt      pgtype.Timestamp `json:"start_at"`
 }
 
+type Kpi struct {
+	ID        pgtype.UUID      `json:"id"`
+	Name      string           `json:"name"`
+	Value     float64          `json:"value"`
+	Target    float64          `json:"target"`
+	Day       pgtype.Date      `json:"day"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+}
+
 type Okr struct {
 	ID          pgtype.UUID `json:"id"`
 	Name        string      `json:"name"`
