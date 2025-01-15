@@ -3,7 +3,7 @@ FROM golang:1.23 AS builder
 WORKDIR /usr/src/app
 
 RUN GRPC_HEALTH_PROBE_VERSION=v0.4.13 && \
-  wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+  wget --no-check-certificate -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
   chmod +x /bin/grpc_health_probe
 
 # pre-copy/cache go.mod for pre-downloading dependencies and only redownloading
