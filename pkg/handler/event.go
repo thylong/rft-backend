@@ -42,19 +42,19 @@ func (s *EventServiceServer) GetEvents(ctx context.Context, req *eventpb.GetEven
 		Offset:  int32(offset),
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to fetch events: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch events: %s", err)
 	}
 
 	totalCount, err := s.queries.GetEventsCount(ctx, pgtype.Text{String: req.Search, Valid: true})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to fetch event count: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch event count: %s", err)
 	}
 
 	var pbEvents []*eventpb.Event
 	for _, e := range events {
 		startAt, err := convertToProtoDateTime(e.StartAt)
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to convert start time: %w", err)
+			return nil, status.Errorf(codes.Internal, "failed to convert start time: %s", err)
 		}
 		pbEvents = append(pbEvents, &eventpb.Event{
 			EventId:      e.EventID.String(),
@@ -82,7 +82,7 @@ func (s *EventServiceServer) GetEvent(ctx context.Context, req *eventpb.GetEvent
 	// Parse and validate the UUID
 	parsedUUID, err := uuid.Parse(req.EventId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %s", err)
 	}
 
 	// Create a pgtype.UUID instance
@@ -96,12 +96,12 @@ func (s *EventServiceServer) GetEvent(ctx context.Context, req *eventpb.GetEvent
 		if err == sql.ErrNoRows {
 			return nil, status.Errorf(codes.NotFound, "event not found")
 		}
-		return nil, status.Errorf(codes.Internal, "failed to fetch event: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch event: %s", err)
 	}
 
 	startAt, err := convertToProtoDateTime(event.StartAt)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "failed to convert start time: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "failed to convert start time: %s", err)
 	}
 
 	return &eventpb.GetEventResponse{
@@ -137,7 +137,7 @@ func (s *EventServiceServer) PutEvent(ctx context.Context, req *eventpb.PutEvent
 		StartAt:      pgtype.Timestamp{Time: startAt, Valid: true},
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to insert event: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to insert event: %s", err)
 	}
 
 	startAtProto, _ := convertToProtoDateTime(event.StartAt)
@@ -162,7 +162,7 @@ func (s *EventServiceServer) DeleteEvent(ctx context.Context, req *eventpb.Delet
 	// Parse and validate the UUID
 	parsedUUID, err := uuid.Parse(req.EventID)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %s", err)
 	}
 
 	// Create a pgtype.UUID instance
@@ -173,7 +173,7 @@ func (s *EventServiceServer) DeleteEvent(ctx context.Context, req *eventpb.Delet
 
 	err = s.queries.DeleteEvent(ctx, eventID)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to delete event: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to delete event: %s", err)
 	}
 	return &eventpb.DeleteEventResponse{}, nil
 }

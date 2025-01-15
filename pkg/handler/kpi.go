@@ -40,12 +40,12 @@ func (s *KpiServiceServer) GetKpis(ctx context.Context, req *kpipb.GetKpisReques
 		Offset:  int32(offset),
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to fetch kpis: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch kpis: %s", err)
 	}
 
 	totalCount, err := s.queries.GetKpisCount(ctx, pgtype.Text{String: req.Search, Valid: true})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to fetch kpi count: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch kpi count: %s", err)
 	}
 
 	var pbKpis []*kpipb.Kpi
@@ -72,7 +72,7 @@ func (s *KpiServiceServer) GetKpi(ctx context.Context, req *kpipb.GetKpiRequest)
 	// Parse and validate the UUID
 	parsedUUID, err := uuid.Parse(req.Id)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %s", err)
 	}
 
 	// Create a pgtype.UUID instance
@@ -86,7 +86,7 @@ func (s *KpiServiceServer) GetKpi(ctx context.Context, req *kpipb.GetKpiRequest)
 		if err == sql.ErrNoRows {
 			return nil, status.Errorf(codes.NotFound, "kpi not found")
 		}
-		return nil, status.Errorf(codes.Internal, "failed to fetch kpi: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch kpi: %s", err)
 	}
 
 	return &kpipb.GetKpiResponse{
@@ -107,7 +107,7 @@ func (s *KpiServiceServer) PutKpi(ctx context.Context, req *kpipb.PutKpiRequest)
 	// Use Scan to set the value
 	err := pgDate.Scan(req.Day)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "failed to parse Day field: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "failed to parse Day field: %s", err)
 	}
 
 	kpi, err := s.queries.InsertKpi(ctx, db.InsertKpiParams{
@@ -117,7 +117,7 @@ func (s *KpiServiceServer) PutKpi(ctx context.Context, req *kpipb.PutKpiRequest)
 		Day:    pgDate,
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to insert kpi: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to insert kpi: %s", err)
 	}
 
 	return &kpipb.PutKpiResponse{
@@ -136,7 +136,7 @@ func (s *KpiServiceServer) DeleteKpi(ctx context.Context, req *kpipb.DeleteKpiRe
 	// Parse and validate the UUID                                        Kpi
 	parsedUUID, err := uuid.Parse(req.Id)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %s", err)
 	}
 
 	// Create a pgtype.UUID instance
@@ -147,7 +147,7 @@ func (s *KpiServiceServer) DeleteKpi(ctx context.Context, req *kpipb.DeleteKpiRe
 
 	err = s.queries.DeleteKpi(ctx, kpiID)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to delete kpi: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to delete kpi: %s", err)
 	}
 	return &kpipb.DeleteKpiResponse{}, nil
 }

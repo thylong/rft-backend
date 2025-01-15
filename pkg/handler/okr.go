@@ -39,12 +39,12 @@ func (s *OkrServiceServer) GetOkrs(ctx context.Context, req *pb.GetOkrsRequest) 
 		Offset: int32(offset),
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to fetch okrs: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch okrs: %s", err)
 	}
 
 	totalCount, err := s.queries.GetOkrsCount(ctx, pgtype.Text{String: req.Search, Valid: true})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to fetch okr count: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch okr count: %s", err)
 	}
 
 	var pbOkrs []*pb.Okr
@@ -91,7 +91,7 @@ func (s *OkrServiceServer) GetOkr(ctx context.Context, req *pb.GetOkrRequest) (*
 	// Parse and validate the UUID
 	parsedUUID, err := uuid.Parse(req.Id)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %s", err)
 	}
 
 	// Create a pgtype.UUID instance
@@ -105,7 +105,7 @@ func (s *OkrServiceServer) GetOkr(ctx context.Context, req *pb.GetOkrRequest) (*
 		if err == sql.ErrNoRows {
 			return nil, status.Errorf(codes.NotFound, "okr not found")
 		}
-		return nil, status.Errorf(codes.Internal, "failed to fetch okr: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to fetch okr: %s", err)
 	}
 
 	return &pb.GetOkrResponse{
@@ -128,7 +128,7 @@ func (s *OkrServiceServer) PutOkr(ctx context.Context, req *pb.PutOkrRequest) (*
 		Description: req.Description,
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to insert okr: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to insert okr: %s", err)
 	}
 
 	return &pb.PutOkrResponse{
@@ -147,7 +147,7 @@ func (s *OkrServiceServer) DeleteOkr(ctx context.Context, req *pb.DeleteOkrReque
 	// Parse and validate the UUID
 	parsedUUID, err := uuid.Parse(req.Id)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %s", err)
 	}
 
 	// Create a pgtype.UUID instance
@@ -158,7 +158,7 @@ func (s *OkrServiceServer) DeleteOkr(ctx context.Context, req *pb.DeleteOkrReque
 
 	err = s.queries.DeleteOkr(ctx, okrID)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to delete okr: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to delete okr: %s", err)
 	}
 	return &pb.DeleteOkrResponse{}, nil
 }
@@ -170,7 +170,7 @@ func (s *OkrServiceServer) PutKr(ctx context.Context, req *pb.PutKrRequest) (*pb
 	var pgUUID pgtype.UUID
 	err := pgUUID.Scan(req.OkrId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "failed to parse okr_id UUID: %w", err)
+		return nil, status.Errorf(codes.InvalidArgument, "failed to parse okr_id UUID: %s", err)
 	}
 	kr, err := s.queries.InsertKeyResult(ctx, db.InsertKeyResultParams{
 		OkrID:       pgUUID,
@@ -183,7 +183,7 @@ func (s *OkrServiceServer) PutKr(ctx context.Context, req *pb.PutKrRequest) (*pb
 		Initiatives: req.Initiatives,
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to insert kr: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to insert kr: %s", err)
 	}
 
 	return &pb.PutKrResponse{
