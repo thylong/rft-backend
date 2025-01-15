@@ -42,7 +42,7 @@ jobs:
       # Build the Binary
       - name: Build Go Binary
         run: |
-          go build -o example ./cmd
+          go build -o build/example ./cmd
 
       # Verify Build Success
       - name: Check if binary exists
@@ -56,5 +56,4 @@ jobs:
       # Run tests
       - name: Run tests
         run: |
-          cd ${{ matrix.module }}
           go test ./...
