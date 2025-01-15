@@ -1,7 +1,5 @@
-# Example [![GoDoc](https://godoc.org/github.com/thylong/example?status.png)](https://godoc.org/github.com/thylong/example) [![License](https://img.shields.io/badge/License-MIT%202.0-green.svg)](https://github.com/thylong/gonew-templates/blob/main/06-grpc-sqlc/LICENSE)
+# rft-backend [![GoDoc](https://godoc.org/github.com/thylong/rft-backend?status.png)](https://godoc.org/github.com/thylong/rft-backend) [![Go Report Card](https://goreportcard.com/badge/github.com/thylong/rft-backend)](https://goreportcard.com/report/github.com/thylong/rft-backend) [![License](https://img.shields.io/badge/License-MIT%202.0-green.svg)](https://github.com/thylong/rft-backend/blob/main//LICENSE) [![Rft-backend](https://github.com/thylong/rft-backend/actions/workflows/main.yaml/badge.svg)](https://github.com/thylong/rft-backend/actions/workflows/main.yaml)
 <!-- Logo -->
-<!-- Labels (godoc, goreport, gocover, gosec, tests, doc link, Slack, license) -->
-<!-- Pronunciation -->
 
 <!-- Short description -->
 Typical development workflow consist in the following steps:
@@ -226,8 +224,6 @@ grpcurl -plaintext localhost:50051 grpc.health.v1.Health/Check
 
 ## Benchmarks
 
-## Installation
-
 ## Features
 
 ## FAQ
@@ -235,3 +231,5 @@ grpcurl -plaintext localhost:50051 grpc.health.v1.Health/Check
 ## License
 
 ## Contributing
+
+Sole guidelines: write clean code, avoid unnecessary complexity and keep it fun please 🎉
